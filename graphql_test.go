@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hasura/go-graphql-client"
+	"github.com/pwnoz0r/go-graphql-client"
 )
 
 func TestClient_PersistentQuery(t *testing.T) {
