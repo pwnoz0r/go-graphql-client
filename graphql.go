@@ -229,6 +229,12 @@ func (c *Client) request(ctx context.Context, query string, variables map[string
 
 	if c.debug {
 		respReader.Seek(0, io.SeekStart)
+
+		s, err := io.ReadAll(r)
+		if err != nil {
+			return nil, nil, nil, Errors{newError(ErrJsonDecode, err)}
+		}
+		fmt.Printf("res -> %v", string(s))
 	}
 
 	if err != nil {

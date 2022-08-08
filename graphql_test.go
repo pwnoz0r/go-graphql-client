@@ -27,7 +27,7 @@ func TestClient_PersistentQuery(t *testing.T) {
 		}`)
 	})
 
-	client := graphql.NewClient("/graphql", &http.Client{Transport: localRoundTripper{handler: mux}})
+	client := graphql.NewClient("/graphql", &http.Client{Transport: localRoundTripper{handler: mux}}).WithDebug(true)
 
 	var q struct {
 		User struct {
