@@ -16,6 +16,9 @@ import (
 type constructOptionsOutput struct {
 	operationName       string
 	operationDirectives []string
+
+	persistentQueryName    persistentQueryOptionName
+	persistentQueryVersion persistentQueryOptionVersion
 }
 
 func (coo constructOptionsOutput) OperationDirectivesString() string {
@@ -35,6 +38,10 @@ func constructOptions(options []Option) (*constructOptionsOutput, error) {
 			output.operationName = option.String()
 		case OptionTypeOperationDirective:
 			output.operationDirectives = append(output.operationDirectives, option.String())
+		case optionTypePersistentOperationName:
+			output.persistentQueryName.name = option.String()
+		case optionTypePersistentOperationVersion:
+			output.persistentQueryVersion.version = option.String()
 		default:
 			return nil, fmt.Errorf("invalid query option type: %s", option.Type())
 		}
@@ -59,11 +66,16 @@ func ConstructQuery(v interface{}, variables map[string]interface{}, options ...
 		return fmt.Sprintf("query %s(%s)%s%s", optionsOutput.operationName, queryArguments(variables), optionsOutput.OperationDirectivesString(), query), nil
 	}
 
-	if optionsOutput.operationName == "" && len(optionsOutput.operationDirectives) == 0 {
-		return query, nil
+	if optionsOutput.operationName != "" && len(optionsOutput.operationDirectives) > 0 {
+		query = fmt.Sprintf("query %s%s%s", optionsOutput.operationName, optionsOutput.OperationDirectivesString(), query)
 	}
 
-	return fmt.Sprintf("query %s%s%s", optionsOutput.operationName, optionsOutput.OperationDirectivesString(), query), nil
+	if optionsOutput.persistentQueryName.name != "" && optionsOutput.persistentQueryVersion.version != "" {
+		query = fmt.Sprintf(`query %v extensions {persistedQuery(input: { version: %v, sha256Hash: "%v" })}}`,
+			query[:len(query)-1], optionsOutput.persistentQueryVersion.version, optionsOutput.persistentQueryName.name)
+	}
+
+	return query, nil
 }
 
 // ConstructQuery build GraphQL mutation string from struct and variables

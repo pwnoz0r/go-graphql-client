@@ -95,6 +95,10 @@ func (c *Client) NamedMutateRaw(ctx context.Context, name string, m interface{},
 	return c.doRaw(ctx, mutationOperation, m, variables, append(options, OperationName(name))...)
 }
 
+func (c *Client) PersistentQuery(ctx context.Context, q interface{}, variables map[string]interface{}, queryId string, version int, options ...Option) error {
+	return c.do(ctx, queryOperation, q, variables, append(options, PersistentQueryName(queryId), PersistentQueryVersion(version))...)
+}
+
 // buildAndRequest the common method that builds and send graphql request
 func (c *Client) buildAndRequest(ctx context.Context, op operationType, v interface{}, variables map[string]interface{}, options ...Option) (*json.RawMessage, *http.Response, io.Reader, Errors) {
 	var query string
