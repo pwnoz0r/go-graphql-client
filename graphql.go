@@ -234,7 +234,7 @@ func (c *Client) request(ctx context.Context, query string, variables map[string
 		if err != nil {
 			return nil, nil, nil, Errors{newError(ErrJsonDecode, err)}
 		}
-		fmt.Printf("res -> %v", string(s))
+		fmt.Printf("res -> %v\n", string(s))
 	}
 
 	if err != nil {
