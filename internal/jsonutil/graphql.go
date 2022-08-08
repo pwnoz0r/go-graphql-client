@@ -408,6 +408,12 @@ func hasGraphQLName(f reflect.StructField, name string) bool {
 	if !ok {
 		// TODO: caseconv package is relatively slow. Optimize it, then consider using it here.
 		//return caseconv.MixedCapsToLowerCamelCase(f.Name) == name
+
+		// EqualFold returns false if the string starts with an underscore - we need to trim
+		if strings.HasPrefix(name, "_") {
+			name = strings.TrimLeft(name, "_")
+		}
+
 		return strings.EqualFold(f.Name, name)
 	}
 	return keyHasGraphQLName(value, name)
