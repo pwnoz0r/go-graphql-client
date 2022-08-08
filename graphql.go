@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/pwnoz0r/go-graphql-client/internal/jsonutil"
@@ -120,12 +121,37 @@ func (c *Client) buildAndRequest(ctx context.Context, op operationType, v interf
 // Request the common method that send graphql request
 func (c *Client) request(ctx context.Context, query string, variables map[string]interface{}, options ...Option) (*json.RawMessage, *http.Response, io.Reader, Errors) {
 	in := struct {
-		Query     string                 `json:"query"`
-		Variables map[string]interface{} `json:"variables,omitempty"`
+		Query      string                 `json:"query,omitempty"`
+		Variables  map[string]interface{} `json:"variables,omitempty"`
+		Extensions struct {
+			PersistedQuery struct {
+				Version    int    `json:"version"`
+				Sha256Hash string `json:"sha256Hash"`
+			} `json:"persistedQuery,omitempty"`
+		} `json:"extensions,omitempty"`
 	}{
 		Query:     query,
 		Variables: variables,
 	}
+
+	removeQuery := false
+
+	for _, option := range options {
+		switch option.Type() {
+		case optionTypePersistentOperationName:
+			in.Extensions.PersistedQuery.Sha256Hash = option.String()
+			removeQuery = true
+		case optionTypePersistentOperationVersion:
+			in.Extensions.PersistedQuery.Version, _ = strconv.Atoi(option.String())
+
+			removeQuery = true
+		}
+	}
+
+	if removeQuery {
+		in.Query = ""
+	}
+
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(in)
 	if err != nil {

@@ -70,11 +70,6 @@ func ConstructQuery(v interface{}, variables map[string]interface{}, options ...
 		query = fmt.Sprintf("query %s%s%s", optionsOutput.operationName, optionsOutput.OperationDirectivesString(), query)
 	}
 
-	if optionsOutput.persistentQueryName.name != "" && optionsOutput.persistentQueryVersion.version != "" {
-		query = fmt.Sprintf(`query %v extensions {persistedQuery(input: { version: %v, sha256Hash: "%v" })}}`,
-			query[:len(query)-1], optionsOutput.persistentQueryVersion.version, optionsOutput.persistentQueryName.name)
-	}
-
 	return query, nil
 }
 
