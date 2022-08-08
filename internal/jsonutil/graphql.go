@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -131,7 +132,7 @@ func (d *decoder) decode() error {
 				d.vs[i] = append(d.vs[i], f)
 			}
 			if !someFieldExist {
-				return fmt.Errorf("struct field for %q doesn't exist in any of %v places to unmarshal", key, len(d.vs))
+				log.Printf("struct field for %q doesn't exist in any of %v places to unmarshal", key, len(d.vs))
 			}
 
 			if rawMessage || isScalar {
